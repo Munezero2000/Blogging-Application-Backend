@@ -1,4 +1,4 @@
-package tech.mag.blog.entity;
+package tech.mag.blog.user;
 
 public enum Role {
     AUTHOR, 
