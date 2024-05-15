@@ -17,10 +17,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import tech.mag.blog.blog.Blog;
+import tech.mag.blog.util.ERole;
 
 @Entity
 @Table(name = "users")
 @Data
+@RequiredArgsConstructor
 public class User implements UserDetails {
 
     @Id
@@ -47,7 +50,7 @@ public class User implements UserDetails {
 
     @Column(name = "user_role", columnDefinition = "varchar(255) default 'AUTHOR'")
     @Enumerated(EnumType.STRING)
-    private Role role = Role.AUTHOR;
+    private ERole role = ERole.AUTHOR;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -56,6 +59,12 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Blog> blogs = new ArrayList<>();
+
+    // METHODS
 
     @JsonIgnore
     @Override
