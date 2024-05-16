@@ -1,11 +1,10 @@
 package tech.mag.blog.blog;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +15,7 @@ public class BlogService {
     private BlogRepository blogRepository;
 
     public List<Blog> getAllBlogs() {
-        return blogRepository.findAll();
+        return blogRepository.findAll(Sort.by(Sort.Direction.DESC, "publicationDate"));
     }
 
     public Optional<Blog> getBlogById(UUID id) {
@@ -28,7 +27,7 @@ public class BlogService {
 
             return "Blog with this title already exists";
         } else {
-            Blog theBlog = blogRepository.save(blog);
+            blogRepository.save(blog);
             return "Blog created successfully";
 
         }

@@ -5,12 +5,14 @@ import tech.mag.blog.util.ERole;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static org.springframework.http.HttpMethod.GET;
@@ -23,7 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-        private static final String[] WHITE_LIST_URL = { "/api/auth/**", "/api/users/register", "/api/blogs/all" };
+        private static final String[] WHITE_LIST_URL = { "/api/auth/**", "/api/users/register", "/api/blogs/all",
+                        "/api/blogs/{id}" };
         @Autowired
         private final JwtAuthenticationFilter jwtAuthFilter;
         @Autowired
@@ -44,5 +47,14 @@ public class SecurityConfiguration {
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
+        }
+
+        @Bean
+        public AccessDeniedHandler accessDeniedHandler() {
+                return (request, response, accessDeniedException) -> {
+                        // Customize the error response as needed
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
+                };
         }
 }

@@ -11,6 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -24,6 +26,7 @@ import tech.mag.blog.util.ERole;
 @Table(name = "users")
 @Data
 @RequiredArgsConstructor
+@JsonIgnoreProperties({ "comments", "hibernateLazyInitializer", "handler" })
 public class User implements UserDetails {
 
     @Id
@@ -60,8 +63,9 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @JsonManagedReference
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Blog> blogs = new ArrayList<>();
 
     // METHODS
