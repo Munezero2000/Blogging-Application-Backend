@@ -64,7 +64,7 @@ This is the backend API for a Blogging Website built using Spring Boot. It provi
 
 ## API Endpoints
 
-- Detailed documentation of API endpoints can be found in [API Documentation](api_documentation.md).
+- Detailed documentation of API endpoints can be found in [API Documentation](http://localhost:8081/swagger-ui/index.html).
 
 ## Contributing
 
