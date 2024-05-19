@@ -68,7 +68,6 @@ public class SecurityConfiguration {
         @Bean
         public AccessDeniedHandler accessDeniedHandler() {
                 return (request, response, accessDeniedException) -> {
-                        // Customize the error response as needed
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
                 };

@@ -40,7 +40,7 @@ public class UserController {
             @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture) {
         try {
             User user = new User();
-            user.setUsername(username);
+            user.setNames(username);
             user.setEmail(email);
 
             // Hashing the password
@@ -113,7 +113,7 @@ public class UserController {
             // Create a new User object with the received attributes
             User user = new User();
             user.setId(id);
-            user.setUsername(username);
+            user.setNames(username);
             user.setEmail(email);
 
             // Hashing the password

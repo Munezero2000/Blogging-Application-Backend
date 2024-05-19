@@ -12,8 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByUsername(String username);
-
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.likedBlogs WHERE u.id = :userId")
     Optional<User> findByIdWithLikedBlogs(@Param("userId") UUID userId);
 }
