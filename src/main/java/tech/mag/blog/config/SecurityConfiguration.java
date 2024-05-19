@@ -25,8 +25,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-        private static final String[] WHITE_LIST_URL = { "/api/auth/**", "/api/users/register", "/api/blogs/all",
-                        "/api/blogs/{id}" };
+        private static final String[] WHITE_LIST_URL = {
+                        "/api/auth/**",
+                        "/api/users/register",
+                        "/api/blogs/all",
+                        "/api/blogs/{id}",
+                        "/api/subscribers/subscribe",
+                        "/api/auth/register",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui/index.html" };
         @Autowired
         private final JwtAuthenticationFilter jwtAuthFilter;
         @Autowired

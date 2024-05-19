@@ -14,8 +14,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import tech.mag.blog.util.ESubStatus;
 
+@Data
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Entity
 @Table(name = "subscribers")
 public class Subscriber {

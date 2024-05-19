@@ -18,6 +18,10 @@ public class SubscriberService {
     }
 
     public String subscribeOnBlog(Subscriber subscriber) {
+        if (subscriberRepository.findByEmail(subscriber.getEmail()).isPresent()) {
+            return "You are already subscribed to our email";
+        }
+        ;
         Subscriber theSubscriber = subscriberRepository.save(subscriber);
         if (theSubscriber != null) {
             return "You have successfully subscribed to our blog";

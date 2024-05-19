@@ -16,7 +16,6 @@ public class CommentService {
     @Autowired
     BlogService blogService;
 
-
     // a function to get all comment on a blog
     public List<Comment> getBlogComments(UUID blogId) {
         Optional<Blog> optionalBlog = blogService.getBlogById(blogId);
@@ -41,7 +40,12 @@ public class CommentService {
         return "Comment deleted successfully";
     }
 
-    public String updateBlogComment(Comment comment) {
-        return null;
+    public Comment updateBlogComment(Comment comment) {
+        return commentRespostory.save(comment);
+    }
+
+    public Optional<Comment> getCommentById(UUID commentId) {
+        return commentRespostory.findById(commentId);
+
     }
 }

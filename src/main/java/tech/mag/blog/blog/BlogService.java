@@ -1,12 +1,14 @@
 package tech.mag.blog.blog;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BlogService {
@@ -14,8 +16,11 @@ public class BlogService {
     @Autowired
     private BlogRepository blogRepository;
 
-    public List<Blog> getAllBlogs() {
-        return blogRepository.findAll(Sort.by(Sort.Direction.DESC, "publicationDate"));
+    public Page<Blog> getAllBlogs(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return blogRepository.findAll(pageable);
     }
 
     public Optional<Blog> getBlogById(UUID id) {
@@ -24,12 +29,10 @@ public class BlogService {
 
     public String createBlog(Blog blog) {
         if (blogRepository.findByTitle(blog.getTitle()).isPresent()) {
-
             return "Blog with this title already exists";
         } else {
             blogRepository.save(blog);
             return "Blog created successfully";
-
         }
     }
 

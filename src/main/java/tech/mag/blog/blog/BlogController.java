@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import tech.mag.blog.user.User;
+import tech.mag.blog.user.UserService;
 import tech.mag.blog.util.EBlogCategory;
 
 @RestController
@@ -30,16 +32,27 @@ public class BlogController {
     @Autowired
     private BlogService blogService;
 
+    @Autowired
+    private UserService userService;
+
     @Value("${profile.picture.upload.directory}")
     private String uploadDirectory;
 
     // controller for getting all the blogs
-    @GetMapping(value = "/all", produces = {
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<?> getAllblogs() {
-        List<Blog> blogs = blogService.getAllBlogs();
-        Map<String, List> response = new HashMap<>();
-        response.put("blogs", blogs);
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllBlogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "publicationDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Page<Blog> blogsPage = blogService.getAllBlogs(page, size, sortBy, sortDir);
+        Map<String, Object> response = new HashMap<>();
+        response.put("blogs", blogsPage.getContent());
+        response.put("currentPage", blogsPage.getNumber());
+        response.put("totalItems", blogsPage.getTotalElements());
+        response.put("totalPages", blogsPage.getTotalPages());
+
         return ResponseEntity.ok(response);
     }
 
@@ -187,4 +200,32 @@ public class BlogController {
 
     }
 
+    @GetMapping("/{blogId}/like")
+    public ResponseEntity<?> likeBlog(@PathVariable UUID blogId) {
+
+        Optional<Blog> blogOptional = blogService.getBlogById(blogId);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        System.out.println(user);
+
+        if (blogOptional.isPresent()) {
+            Blog blog = blogOptional.get();
+            if (!blog.getLikedByUsers().contains(user)) {
+                blog.getLikedByUsers().add(user);
+                user.getLikedBlogs().add(blog);
+                blogService.updateBlog(blogId, blog);
+                userService.updateUser(user);
+                return ResponseEntity.ok("You liked this blog");
+            } else {
+                blog.getLikedByUsers().remove(user);
+                user.getLikedBlogs().remove(blog);
+                blogService.updateBlog(blogId, blog);
+                userService.updateUser(user);
+                return ResponseEntity.ok("You unliked this blog");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

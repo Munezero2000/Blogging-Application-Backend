@@ -11,5 +11,4 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class CommentRequest {
     private String text;
-    private UUID blogId;
 }

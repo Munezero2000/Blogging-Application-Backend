@@ -38,8 +38,9 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    @PostMapping(value = "/new")
-    public ResponseEntity<?> commentOnBlog(@Valid @RequestBody CommentRequest commentRequest) {
+    @PostMapping(value = "/{blogId}/newComment")
+    public ResponseEntity<?> commentOnBlog(@Valid @PathVariable UUID blogId,
+            @RequestBody CommentRequest commentRequest) {
         try {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,7 +50,7 @@ public class CommentController {
             comment.setWriter(writer);
             comment.setText(commentRequest.getText());
 
-            Optional<Blog> optionalBlog = blogService.getBlogById(commentRequest.getBlogId());
+            Optional<Blog> optionalBlog = blogService.getBlogById(blogId);
             Blog blog = null;
             if (optionalBlog.isPresent()) {
                 blog = optionalBlog.get();
@@ -80,16 +81,15 @@ public class CommentController {
             Comment comment = new Comment();
 
             Optional<Blog> optionalBlog = blogService.getBlogById(blogId);
+            Optional<Comment> optionalComment = commentService.getCommentById(commentId);
             Blog blog = null;
 
-            if (optionalBlog.isPresent()) {
+            if (optionalBlog.isPresent() && optionalComment.isPresent()) {
                 blog = optionalBlog.get();
-                if (writer.getId() != blog.getAuthor().getId()) {
+                comment = optionalComment.get();
+                if (!writer.getId().equals(blog.getAuthor().getId())) {
                     return new ResponseEntity<>("You are not allowed to update this comment", HttpStatus.UNAUTHORIZED);
                 } else {
-                    comment.setId(blogId);
-                    comment.setBlog(blog);
-                    comment.setWriter(writer);
                     comment.setText(commentRequest.getText());
                     commentService.updateBlogComment(comment);
                     return new ResponseEntity<>("Comment updated successfully", HttpStatus.OK);
@@ -113,8 +113,8 @@ public class CommentController {
 
             if (optionalBlog.isPresent()) {
                 blog = optionalBlog.get();
-                if ((writer.getId() != blog.getAuthor().getId()) || (writer.getRole() != ERole.ADMIN)) {
-                    return new ResponseEntity<>("You are not allowed to update this comment", HttpStatus.UNAUTHORIZED);
+                if ((!writer.getId().equals(blog.getAuthor().getId())) || (writer.getRole() != ERole.ADMIN)) {
+                    return new ResponseEntity<>("You are not allowed to delete this comment", HttpStatus.UNAUTHORIZED);
                 }
                 String feedback = commentService.deleteBlogComment(commentId);
                 if (feedback.equalsIgnoreCase("Comment deleted successfully")) {
