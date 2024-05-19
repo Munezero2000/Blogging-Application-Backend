@@ -3,11 +3,8 @@ package tech.mag.blog.blog;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -200,7 +197,7 @@ public class BlogController {
 
     }
 
-    @GetMapping("/{blogId}/like")
+    @GetMapping("/{blogId}/toggleLike")
     public ResponseEntity<?> likeBlog(@PathVariable UUID blogId) {
 
         Optional<Blog> blogOptional = blogService.getBlogById(blogId);
@@ -208,6 +205,9 @@ public class BlogController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         System.out.println(user);
+
+        // Fetch the user with likedBlogs initialized
+        user = userService.getUserWithLikedBlogs(user.getId());
 
         if (blogOptional.isPresent()) {
             Blog blog = blogOptional.get();
@@ -228,4 +228,18 @@ public class BlogController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // Endpoint to get likes for a specific blog
+    @GetMapping("/{blogId}/likes")
+    public ResponseEntity<?> getBlogLikes(@PathVariable UUID blogId) {
+        Optional<Blog> blogOptional = blogService.getBlogById(blogId);
+        if (blogOptional.isPresent()) {
+            Blog blog = blogOptional.get();
+            Set<User> likedByUsers = blog.getLikedByUsers();
+            return ResponseEntity.ok(likedByUsers);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

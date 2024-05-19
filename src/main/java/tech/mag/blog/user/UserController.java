@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.validation.Valid;
+import tech.mag.blog.blog.Blog;
 
 @RestController
 @RequestMapping("/api/users")
@@ -56,7 +57,7 @@ public class UserController {
                 if (profilePicture != null && !profilePicture.isEmpty()) {
                     userService.uploadProfilePicture(user.getId(), profilePicture);
                 }
-                
+
                 return new ResponseEntity<>(theUser, HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -73,6 +74,19 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{userId}/blogs")
+    public ResponseEntity<?> getUserBlogs(@PathVariable UUID userId) {
+        // Call the service method to retrieve the user's blogs
+        List<Blog> userBlogs = userService.getUserBlogs(userId);
+
+        // Check if the user's blogs were found
+        if (!userBlogs.isEmpty()) {
+            return ResponseEntity.ok(userBlogs);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 

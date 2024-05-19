@@ -38,7 +38,11 @@ public class SecurityConfiguration {
                         "/v3/api-docs",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/swagger-ui/index.html" };
+                        "/swagger-ui/index.html",
+                        "/api/comments//{blogId}/comments",
+                        "/api/blogs/{blogId}/likes",
+
+        };
         @Autowired
         private final JwtAuthenticationFilter jwtAuthFilter;
         @Autowired

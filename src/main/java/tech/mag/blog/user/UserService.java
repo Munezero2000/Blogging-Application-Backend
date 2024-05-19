@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import tech.mag.blog.blog.Blog;
+
 @Service
 public class UserService implements UserDetailsService {
 
@@ -24,6 +29,11 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Transactional
+    public void initializeUserLikedBlogs(User user) {
+        Hibernate.initialize(user.getLikedBlogs());
+    }
 
     // a function to get all users
     public List<User> getAllUsers() {
@@ -56,6 +66,7 @@ public class UserService implements UserDetailsService {
     }
 
     // a function to update user
+    @Transactional
     public String updateUser(User user) {
         Optional<User> optionalUser = userRepository.findById(user.getId());
         if (optionalUser.isPresent()) {
@@ -120,6 +131,21 @@ public class UserService implements UserDetailsService {
             return theUser;
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+    }
+
+    @Transactional
+    public User getUserWithLikedBlogs(UUID userId) {
+        return userRepository.findByIdWithLikedBlogs(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    public List<Blog> getUserBlogs(UUID userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            return user.getBlogs();
+        } else {
+            return List.of();
         }
     }
 
