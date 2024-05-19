@@ -30,7 +30,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
+    @PostMapping(value = "/createUser", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> registerUser(
             @Valid @RequestParam("username") String username,
@@ -56,6 +56,7 @@ public class UserController {
                 if (profilePicture != null && !profilePicture.isEmpty()) {
                     userService.uploadProfilePicture(user.getId(), profilePicture);
                 }
+                
                 return new ResponseEntity<>(theUser, HttpStatus.OK);
             }
         } catch (Exception e) {
