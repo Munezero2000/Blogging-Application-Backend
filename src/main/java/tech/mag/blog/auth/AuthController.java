@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import tech.mag.blog.config.mail.EmailService;
 import tech.mag.blog.user.User;
@@ -44,7 +47,8 @@ public class AuthController {
     private EmailService emailService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -55,12 +59,21 @@ public class AuthController {
             User theUser = user.orElse(null);
             final String token = jwtService.generateToken(userDetails);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
+            // Create a cookie with the token
+            Cookie cookie = new Cookie("token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60);
+
+            response.addCookie(cookie);
+
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("message", "Login successful");
             if (theUser != null) {
-                response.put("userId", theUser.getId().toString());
+                responseBody.put("userId", theUser.getId().toString());
             }
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
@@ -74,9 +87,9 @@ public class AuthController {
         try {
 
             User user = new User();
-            user.setUsername(creationUser.getUsername());
+            user.setNames(creationUser.getUsername());
             user.setEmail(creationUser.getEmail());
-            
+
             // Hashing the password
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             String hashedPassword = passwordEncoder.encode(creationUser.getPassword());
@@ -94,7 +107,7 @@ public class AuthController {
 
                 String htmlContent = emailService.renderHtmlTemplate(
                         "Account Creation Successful!",
-                        "<p>Dear " + user.getUsername() + ",</p>" +
+                        "<p>Dear " + user.getNames() + ",</p>" +
                                 "<p>We are thrilled to confirm that your account has been successfully created. You can now enjoy the following features on our platform:</p>"
                                 +
                                 "<ul>" +

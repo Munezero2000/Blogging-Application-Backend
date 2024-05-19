@@ -33,7 +33,7 @@ public class User implements UserDetails {
     @Column(name = "username")
     @NotBlank(message = "username is required")
     @Size(min = 3, max = 50, message = "username must be between 3 and 50 characters")
-    private String username;
+    private String names;
 
     @Column(name = "email")
     @NotBlank(message = "email is required")
@@ -115,7 +115,7 @@ public class User implements UserDetails {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", username='" + username + '\'' +
+                ", username='" + names + '\'' +
                 ", email='" + email + '\'' +
                 ", role=" + role +
                 '}';
