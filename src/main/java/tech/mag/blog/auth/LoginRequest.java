@@ -17,6 +17,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "A valid password is needed")
-    @Size(min = 5, max = 50, message = "password must be between 5 and 50 characters")
+    @Size(min = 4, max = 50, message = "password must be between 5 and 50 characters")
     private String password;
 }

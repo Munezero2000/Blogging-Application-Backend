@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -37,7 +38,7 @@ public class Blog {
     @Column(name = "title", nullable = false, unique = true)
     private String title;
 
-    @Size(min = 200, max = 10000, message = "content must be 100 characters minumum")
+    @Size(min = 200, max = 10000, message = "content must be 100 characters minimum")
     @NotBlank(message = "content must not be empty")
     @Column(name = "post_content")
     private String content;
@@ -70,9 +71,11 @@ public class Blog {
     @JoinColumn(name = "author_id")
     private User author;
 
+    @JsonBackReference
+    @ManyToMany(mappedBy = "likedBlogs", fetch = FetchType.LAZY)
+    private Set<User> likedByUsers;
+
+    @JsonBackReference
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> comments = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "likedBlogs")
-    private Set<User> likedByUsers;
 }
