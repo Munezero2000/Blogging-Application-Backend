@@ -55,9 +55,6 @@ public class Blog {
     @Enumerated(EnumType.STRING)
     private EBlogCategory category;
 
-    @Column(name = "read_time")
-    private String readTime = "30";
-
     @CreationTimestamp
     @Column(name = "created_at")
     private Date publicationDate;

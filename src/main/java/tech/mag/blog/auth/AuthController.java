@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,6 +76,10 @@ public class AuthController {
                 responseBody.put("userId", theUser.getId().toString());
             }
             return ResponseEntity.ok(responseBody);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");

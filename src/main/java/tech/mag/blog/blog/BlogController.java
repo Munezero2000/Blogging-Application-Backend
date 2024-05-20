@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -77,7 +76,6 @@ public class BlogController {
             @Valid @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("category") String category,
-            @RequestParam("readTime") String readTime,
             @RequestParam(value = "blogThumbnail", required = true) MultipartFile image) throws IOException {
 
         try {
@@ -103,7 +101,6 @@ public class BlogController {
             blog.setContent(content);
             blog.setBlogThumbnail(blogThumbnail);
             blog.setCategory(EBlogCategory.valueOf(category));
-            blog.setReadTime(readTime);
             blog.setAuthor(author);
 
             String feedback = blogService.createBlog(blog);
@@ -145,9 +142,6 @@ public class BlogController {
             }
             if (category != null) {
                 blog.setCategory(EBlogCategory.valueOf(category));
-            }
-            if (readTime != null) {
-                blog.setReadTime(readTime);
             }
             if (image != null && !image.isEmpty()) {
                 String blogThumbnail = System.currentTimeMillis() + image.getOriginalFilename();
