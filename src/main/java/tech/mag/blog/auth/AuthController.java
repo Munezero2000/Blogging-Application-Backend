@@ -64,7 +64,7 @@ public class AuthController {
             // Create a cookie with the token
             Cookie cookie = new Cookie("token", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setSecure(false);
             cookie.setPath("/");
             cookie.setMaxAge(24 * 60 * 60);
 
