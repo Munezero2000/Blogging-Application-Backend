@@ -26,6 +26,7 @@ public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST_URL = {
         "/api/auth/**",
+        "/uploads/**",
         "/api/users/register",
         "/api/blogs/all",
         "/api/blogs/{id}",
@@ -52,15 +53,15 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            .authorizeHttpRequests(req -> req
-                .requestMatchers(WHITE_LIST_URL).permitAll()
-                .requestMatchers(GET, "/api/users/").hasAnyAuthority(ERole.ADMIN.name())
-                .anyRequest().authenticated())
-            .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(WHITE_LIST_URL).permitAll()
+                        .requestMatchers(GET, "/api/users/").hasAnyAuthority(ERole.ADMIN.name())
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
