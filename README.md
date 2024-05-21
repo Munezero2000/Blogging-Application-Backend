@@ -13,8 +13,8 @@ This is the backend API for a Blogging Website built using Spring Boot. It provi
 2. **Post Management**
    - Create, read, update, delete posts
    - Draft, publish, and archive posts
-   - Tagging posts with categories or tags
-   - Retrieve posts by user or category/tag
+   - Tagging posts with categories 
+   - Retrieve posts by user or category
 
 3. **Comment Management**
    - Add, edit, delete comments on posts
@@ -26,8 +26,8 @@ This is the backend API for a Blogging Website built using Spring Boot. It provi
    - Retrieve likes for a specific post
 
 5. **Followers**
-   - Follow/unfollow other users
-   - Get followers/following list for a user
+   - Follow/unfollow other users :pending
+   - Get followers/following list for a user :pending
 
 ## Tech Stack
 
@@ -35,7 +35,7 @@ This is the backend API for a Blogging Website built using Spring Boot. It provi
 - **Spring Security**: For authentication and authorization
 - **Spring Data JPA**: For working with databases using JPA
 - **Hibernate**: ORM (Object-Relational Mapping) tool for Java
-- **MySQL/PostgreSQL**: Relational database management system
+- **PostgreSQL**: Relational database management system
 - **JWT (JSON Web Tokens)**: For secure authentication
 
 ## Getting Started
@@ -57,14 +57,14 @@ This is the backend API for a Blogging Website built using Spring Boot. It provi
 4. Build and run the project:
 
     ```bash
-    ./mvnw spring-boot:run
+    ./mvn spring-boot:run
     ```
 
-5. The API will be available at `http://localhost:8080`.
+5. The API will be available at `http://localhost:8081`.
 
 ## API Endpoints
 
-- Detailed documentation of API endpoints can be found in [API Documentation](api_documentation.md).
+- Detailed documentation of API endpoints can be found in [API Documentation](http://localhost:8081/swagger-ui/index.html).
 
 ## Contributing
 

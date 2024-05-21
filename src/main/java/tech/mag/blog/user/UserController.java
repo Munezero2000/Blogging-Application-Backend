@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.validation.Valid;
+import tech.mag.blog.blog.Blog;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,7 +31,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
+    @PostMapping(value = "/createUser", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> registerUser(
             @Valid @RequestParam("username") String username,
@@ -39,7 +40,7 @@ public class UserController {
             @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture) {
         try {
             User user = new User();
-            user.setUsername(username);
+            user.setNames(username);
             user.setEmail(email);
 
             // Hashing the password
@@ -56,6 +57,7 @@ public class UserController {
                 if (profilePicture != null && !profilePicture.isEmpty()) {
                     userService.uploadProfilePicture(user.getId(), profilePicture);
                 }
+
                 return new ResponseEntity<>(theUser, HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -72,6 +74,19 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{userId}/blogs")
+    public ResponseEntity<?> getUserBlogs(@PathVariable UUID userId) {
+        // Call the service method to retrieve the user's blogs
+        List<Blog> userBlogs = userService.getUserBlogs(userId);
+
+        // Check if the user's blogs were found
+        if (!userBlogs.isEmpty()) {
+            return ResponseEntity.ok(userBlogs);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -98,7 +113,7 @@ public class UserController {
             // Create a new User object with the received attributes
             User user = new User();
             user.setId(id);
-            user.setUsername(username);
+            user.setNames(username);
             user.setEmail(email);
 
             // Hashing the password

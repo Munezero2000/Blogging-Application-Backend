@@ -1,4 +1,3 @@
-
 package tech.mag.blog.user;
 
 import java.time.LocalDateTime;
@@ -11,16 +10,20 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import tech.mag.blog.blog.Blog;
+import tech.mag.blog.util.ERole;
 
 @Entity
 @Table(name = "users")
 @Data
+@RequiredArgsConstructor
+@JsonIgnoreProperties({ "comments", "hibernateLazyInitializer", "handler" })
 public class User implements UserDetails {
 
     @Id
@@ -30,7 +33,7 @@ public class User implements UserDetails {
     @Column(name = "username")
     @NotBlank(message = "username is required")
     @Size(min = 3, max = 50, message = "username must be between 3 and 50 characters")
-    private String username;
+    private String names;
 
     @Column(name = "email")
     @NotBlank(message = "email is required")
@@ -47,7 +50,7 @@ public class User implements UserDetails {
 
     @Column(name = "user_role", columnDefinition = "varchar(255) default 'AUTHOR'")
     @Enumerated(EnumType.STRING)
-    private Role role = Role.AUTHOR;
+    private ERole role = ERole.AUTHOR;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -56,6 +59,17 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Blog> blogs = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "blog_likes", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "blog_id"))
+    private Set<Blog> likedBlogs;
+
+    // METHODS
 
     @JsonIgnore
     @Override
@@ -97,4 +111,28 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + names + '\'' +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
