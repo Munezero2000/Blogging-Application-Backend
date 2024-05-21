@@ -56,17 +56,24 @@ public class BlogController {
     // a controller for getting a single blog by id
     @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> getAllblogs(@PathVariable UUID id) {
+        Map<String, Object> response = new HashMap<>();
         try {
             Blog blog;
             if (blogService.getBlogById(id).isPresent()) {
                 blog = blogService.getBlogById(id).get();
-                return ResponseEntity.ok(blog);
+                response.put("blog", blog);
+                response.put("author", blog.getAuthor());
+                response.put("blog_comment", blog.getComments());
+                response.put("blog_likes", blog.getLikedByUsers());
+                return ResponseEntity.ok(response);
             } else {
-                return new ResponseEntity<>("Blog not found", HttpStatus.BAD_REQUEST);
+                response.put("Error", "Blog not found");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             e.getMessage();
-            return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            response.put("Error", "Internal Server Error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
