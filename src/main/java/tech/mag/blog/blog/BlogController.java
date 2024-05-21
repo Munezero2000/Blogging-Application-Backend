@@ -86,7 +86,7 @@ public class BlogController {
 
             String blogThumbnail = System.currentTimeMillis() + image.getOriginalFilename();
 
-            System.out.println("Here I am checking the the image"+image.getOriginalFilename());
+            System.out.println("Here I am checking the the image" + image.getOriginalFilename());
 
             // Create the upload directory if it doesn't exist
             File directory = new File(uploadDirectory);
@@ -107,11 +107,11 @@ public class BlogController {
             blog.setCategory(EBlogCategory.valueOf(category));
             blog.setAuthor(author);
 
-            String feedback = blogService.createBlog(blog);
-            if (feedback.equalsIgnoreCase("Blog with this title already exists")) {
-                return new ResponseEntity<>(feedback, HttpStatus.BAD_REQUEST);
+            Map<String, Object> response = blogService.createBlog(blog);
+            if (response.get("message").equals("Blog with this title already exists")) {
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             } else {
-                return new ResponseEntity<>(feedback, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -136,7 +136,6 @@ public class BlogController {
             }
 
             Blog blog = existingBlogOptional.get();
-
             // Update fields only if they are provided
             if (title != null) {
                 blog.setTitle(title);
@@ -166,11 +165,11 @@ public class BlogController {
             }
 
             // Save the updated blog
-            Blog updatedBlog = blogService.updateBlog(id, blog);
-            if (updatedBlog != null) {
-                return new ResponseEntity<>("Blog updated successfully", HttpStatus.OK);
+            Map<String, Object> response = blogService.updateBlog(blog);
+            if (response.get("messgae").equals("Blog not found")) {
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             } else {
-                return new ResponseEntity<>("Blog not updated successfully", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -212,13 +211,13 @@ public class BlogController {
             if (!blog.getLikedByUsers().contains(user)) {
                 blog.getLikedByUsers().add(user);
                 user.getLikedBlogs().add(blog);
-                blogService.updateBlog(blogId, blog);
+                blogService.updateBlog(blog);
                 userService.updateUser(user);
                 return ResponseEntity.ok("You liked this blog");
             } else {
                 blog.getLikedByUsers().remove(user);
                 user.getLikedBlogs().remove(blog);
-                blogService.updateBlog(blogId, blog);
+                blogService.updateBlog(blog);
                 userService.updateUser(user);
                 return ResponseEntity.ok("You unliked this blog");
             }

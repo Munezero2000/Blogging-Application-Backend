@@ -1,5 +1,7 @@
 package tech.mag.blog.blog;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,22 +29,32 @@ public class BlogService {
         return blogRepository.findById(id);
     }
 
-    public String createBlog(Blog blog) {
+    public Map<String, Object> createBlog(Blog blog) {
+        Map<String, Object> response = new HashMap<>();
         if (blogRepository.findByTitle(blog.getTitle()).isPresent()) {
-            return "Blog with this title already exists";
+            response.put("message", "Blog with this title already exists");
+            return response;
         } else {
-            blogRepository.save(blog);
-            return "Blog created successfully";
+            Blog theBlog = blogRepository.save(blog);
+            response.put("message", "Blog created successfully");
+            response.put("data", theBlog);
+            return response;
         }
     }
 
-    public Blog updateBlog(UUID id, Blog updatedBlog) {
-        Optional<Blog> optionalBlog = blogRepository.findById(id);
+    public Map<String, Object> updateBlog(Blog updatedBlog) {
+        Optional<Blog> optionalBlog = blogRepository.findById(updatedBlog.getId());
+        Map<String, Object> response = new HashMap<>();
+
         if (optionalBlog.isPresent()) {
-            return blogRepository.save(updatedBlog);
+            response.put("message", "Blog updated successfully");
+            response.put("data", blogRepository.save(updatedBlog));
+            return response;
         } else {
-            throw new RuntimeException("Blog not found with id: " + id);
+            response.put("message", "Blog not found");
+            return response;
         }
+
     }
 
     public void deleteBlog(UUID id) {
