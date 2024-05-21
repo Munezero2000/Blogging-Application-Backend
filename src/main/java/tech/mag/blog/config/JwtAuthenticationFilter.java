@@ -1,6 +1,7 @@
 package tech.mag.blog.config;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,21 +30,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserService userService;
 
+    private static final String[] WHITE_LIST_URL = {
+            "/api/auth/**",
+            "/api/users/register",
+            "/api/blogs/all",
+            "/api/blogs/{id}",
+            "/api/subscribers/subscribe",
+            "/api/auth/register",
+            "/configuration/ui",
+            "/configuration/security",
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui/index.html",
+            "/api/comments/{blogId}/comments",
+            "/api/blogs/{blogId}/likes",
+            "/api/blog/create"
+    };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String requestPath = request.getRequestURI();
+
+        // Skip filter for whitelisted URLs
+        if (isWhitelisted(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String jwt = getTokenFromCookies(request);
+            System.out.println("I am checking the token: "+ jwt);
 
             if (jwt == null) {
-                sendUnauthorizedResponse(response, "JWT token is missing.");
+                sendUnauthorizedResponse(response, "JWT token is missing....");
                 return;
             }
 
             String userEmail = jwtService.getUsername(jwt);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userService.loadUserByUsername(userEmail);
+
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                             null, userDetails.getAuthorities());
@@ -56,8 +86,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            sendUnauthorizedResponse(response, "Unauthorized: " + e.getMessage());
+            e.printStackTrace();
+            sendUnauthorizedResponse(response, "Unauthorized:........" + e.getMessage());
         }
+    }
+
+    private boolean isWhitelisted(String requestPath) {
+        return Arrays.stream(WHITE_LIST_URL)
+                .anyMatch(url -> url.endsWith("/**")
+                        ? requestPath.startsWith(url.substring(0, url.length() - 3))
+                        : requestPath.equals(url));
     }
 
     private String getTokenFromCookies(HttpServletRequest request) {
@@ -78,4 +116,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
         response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
+
 }

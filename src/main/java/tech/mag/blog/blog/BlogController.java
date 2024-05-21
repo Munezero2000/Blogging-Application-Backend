@@ -23,6 +23,7 @@ import tech.mag.blog.util.EBlogCategory;
 
 @RestController
 @RequestMapping("/api/blogs")
+@CrossOrigin("*")
 public class BlogController {
 
     @Autowired
@@ -81,8 +82,11 @@ public class BlogController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User author = (User) authentication.getPrincipal();
+            System.out.println("Here I am checking the user: " + author);
 
             String blogThumbnail = System.currentTimeMillis() + image.getOriginalFilename();
+
+            System.out.println("Here I am checking the the image"+image.getOriginalFilename());
 
             // Create the upload directory if it doesn't exist
             File directory = new File(uploadDirectory);
