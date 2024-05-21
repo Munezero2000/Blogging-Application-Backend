@@ -29,8 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserService userService;
 
-    String userEmail;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -39,11 +37,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getTokenFromCookies(request);
 
             if (jwt == null) {
-                filterChain.doFilter(request, response);
+                sendUnauthorizedResponse(response, "JWT token is missing.");
                 return;
             }
 
-            userEmail = jwtService.getUsername(jwt);
+            String userEmail = jwtService.getUsername(jwt);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userService.loadUserByUsername(userEmail);
                 if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -75,6 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.getWriter().write("{\"error\": \"" + message + "\"}");

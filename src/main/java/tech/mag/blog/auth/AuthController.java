@@ -27,7 +27,6 @@ import tech.mag.blog.config.mail.EmailService;
 import tech.mag.blog.user.User;
 import tech.mag.blog.user.UserRepository;
 import tech.mag.blog.user.UserService;
-import tech.mag.blog.auth.UserCreationRequest;
 
 @RestController
 @RequestMapping("/api/auth")
