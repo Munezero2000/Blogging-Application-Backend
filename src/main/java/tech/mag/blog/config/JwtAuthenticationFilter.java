@@ -35,26 +35,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Extract token from cookies
-        String jwt = getTokenFromCookies(request);
+        try {
+            String jwt = getTokenFromCookies(request);
 
-        // If token is not present, stop the chain
-        if (jwt == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        userEmail = jwtService.getUsername(jwt);
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(userEmail);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (jwt == null) {
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            userEmail = jwtService.getUsername(jwt);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userService.loadUserByUsername(userEmail);
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    sendUnauthorizedResponse(response, "Invalid JWT token.");
+                    return;
+                }
+            }
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            sendUnauthorizedResponse(response, "Unauthorized: " + e.getMessage());
         }
-        filterChain.doFilter(request, response);
     }
 
     private String getTokenFromCookies(HttpServletRequest request) {
@@ -67,5 +72,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
